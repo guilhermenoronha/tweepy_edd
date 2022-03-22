@@ -7,6 +7,7 @@ import time
 from tweepy import Stream
 from decouple import config
 from datetime import datetime
+import argparse
 
 global out
 
@@ -17,6 +18,13 @@ class MyListener(Stream):
         return super().on_data(raw_data)
 
 if __name__ == '__main__':
+
+    # Carrega parametros da linha de comando
+    CLI = argparse.ArgumentParser()
+    CLI.add_argument('--seconds', type=int)
+    CLI.add_argument('--track', type=str, default=[])
+    args = CLI.parse_args()
+
     # Carregando as Keys do arquivo .env
     API_KEY=config('API_KEY')
     API_KEY_SECRET=config('API_KEY_SECRET')
@@ -29,6 +37,6 @@ if __name__ == '__main__':
     out = open(f'data/tweets-{now}.txt', 'w', encoding='UTF-8')
     # Executando o Listener pra obter tweets da Ucrânia por 5 segundos.s
     stream = MyListener(API_KEY, API_KEY_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    stream.filter(track=['Ukraine'], threaded=True)
-    time.sleep(5)
+    stream.filter(track=args.track, threaded=True)
+    time.sleep(args.seconds)
     stream.disconnect()
